@@ -1,0 +1,91 @@
+---
+title: Certificate converter
+description: Convert between PEM, PFX/P12, DER/CER, and other common certificate formats.
+sidebar:
+  label: Certificate Converter
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+The certificate converter helps move certificate material between the formats required by different servers, systems, and devices. It currently supports common conversions between PEM, PFX/P12, and DER/CER. Conversion runs in server memory and is not stored as history.
+
+## Open the tool
+
+Go to [Certificate converter](https://anssl.cn/console/tools/cert-convert), or open **Tools → Certificate converter** from the console sidebar.
+
+## Supported formats
+
+| Format | Common extensions | Use cases |
+| ------ | ----------------- | --------- |
+| PEM / CRT / KEY | `.pem`, `.crt`, `.key`, `.cer` | Nginx, Apache, panels, manual deployment |
+| PFX / P12 | `.pfx`, `.p12` | Windows, IIS, and systems that require one bundled certificate file |
+| DER / CER | `.der`, `.cer`, `.crt` | Binary certificate export, some network devices, and embedded environments |
+
+## Conversion workflow
+
+<Steps>
+
+1. **Choose the direction**
+
+   Select the source format and target format. Unsupported target formats are disabled automatically.
+
+2. **Provide source material**
+
+   PEM sources support three input modes:
+
+   - Select certificate: load an existing **Free certificate** or **Local certificate**.
+   - Upload files: upload the certificate, private key, and optional chain file.
+   - Paste text: paste certificate PEM, private key PEM, and chain PEM directly.
+
+   PFX/P12 and DER/CER sources are provided by uploading the source certificate file.
+
+3. **Set passwords and chain options**
+
+   - Source file/private key password: only needed for source PFX files or encrypted private keys.
+   - Output password: required when the target is PFX/P12.
+   - Include certificate chain: applies to PEM and PFX conversions so intermediate certificates are preserved.
+
+4. **Start conversion**
+
+   Click **Start conversion**. Results appear on the right after conversion succeeds.
+
+5. **Copy or download**
+
+   - PEM results can be previewed, copied, and downloaded individually.
+   - Binary results can be downloaded.
+   - Multiple output files can be downloaded together as a ZIP package.
+
+</Steps>
+
+<Aside type="tip">
+  When opened from certificate details, the converter pre-fills the certificate, private key, and chain, and defaults to preparing a PFX/P12 conversion.
+</Aside>
+
+## Common scenarios
+
+### Nginx or Apache deployment
+
+PEM/CRT/KEY is usually the right format. If you only have PFX/P12, convert it to PEM first.
+
+### Windows IIS import
+
+IIS usually requires PFX/P12. Convert the PEM certificate, private key, and chain to PFX/P12, then set an output password.
+
+### Java keystore
+
+A common workflow is to convert to PFX/P12 first and then import it into the target keystore with `keytool`.
+
+### Network devices and embedded systems
+
+Some devices accept only DER/CER. Convert from PEM or PFX/P12 to DER/CER before uploading.
+
+## Notes
+
+- PEM to PFX/P12 requires both the certificate and private key.
+- PFX/P12 targets require an output password.
+- DER usually contains a single certificate and is not suitable for preserving a full private key and chain package.
+- The converter does not keep history, so download any results you need before leaving the page.
+
+<Aside type="caution">
+  Conversion handles private key material. Use it only on trusted devices and networks, and avoid pasting private keys into uncontrolled pages or chat tools.
+</Aside>

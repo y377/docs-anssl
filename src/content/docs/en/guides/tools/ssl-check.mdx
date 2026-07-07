@@ -1,132 +1,122 @@
 ---
-title: SSL/TLS Certificate Check Tool
-description: Analyze SSL/TLS certificate configuration on live servers, detect security issues and vulnerabilities
+title: SSL/TLS certificate check
+description: Check a live host's certificate, protocols, vulnerabilities, and TLS security grade.
+sidebar:
+  label: SSL/TLS Certificate Check
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-The SSL/TLS Certificate Check Tool comprehensively analyzes certificate configurations on live servers, detecting potential security issues, protocol support, and vulnerabilities to help ensure your server's security.
+SSL/TLS certificate check analyzes a live host's certificate and TLS configuration, produces an A+ to F security grade, and shows certificate, protocol, and vulnerability findings. Open it at [SSL security check](https://anssl.cn/console/tools/ssl-check).
 
-## Access the Tool
+## Supported input
 
-Visit the [SSL/TLS Certificate Check Tool](https://anssl.cn/console/tools/ssl-check) page.
+The input field accepts:
 
-## Usage
+- `example.com`: checks port 443 by default.
+- `example.com:8443`: checks a custom port.
+- `192.168.1.100`: checks an IP address.
+- `https://example.com`: protocol prefixes are accepted.
 
-### Single Host Check
-
-<Steps>
-
-1. **Enter Host Address**
-
-   Enter the host address to check in the input field, format:
-   - `example.com` (uses port 443 by default)
-   - `example.com:8443` (specify port)
-   - `192.168.1.100:443` (IP address)
-
-2. **Start Check**
-
-   Click the "Start Check" button, and the system will begin analyzing the target host's SSL/TLS configuration
-
-3. **View Results**
-
-   After the check completes, detailed analysis results will be displayed
-
-</Steps>
-
-### Batch Check
-
-Support checking multiple hosts at once for improved efficiency.
-
-<Steps>
-
-1. **Enter Multiple Hosts**
-
-   Enter one host address per line:
-   ```
-   example.com
-   api.example.com:8443
-   www.example.com
-   ```
-
-2. **Configure Concurrency**
-
-   Set the number of hosts to check simultaneously (recommended: 3-5)
-
-3. **Start Batch Check**
-
-   The system will check all hosts sequentially and display real-time progress
-
-</Steps>
-
-<Aside type="tip">
-  During batch checks, you can see real-time progress and task IDs for each check task for easy tracking.
+<Aside type="note">
+  The current frontend provides single-host checks. Batch checks and report file downloads are not available on the latest page.
 </Aside>
 
-## Understanding Results
+## Run a check
 
-### Overall Grade
+<Steps>
 
-The tool provides a comprehensive grade from A+ to F:
+1. **Enter the host**
 
-- **A+/A**: Excellent, comprehensive security configuration
-- **B**: Good, minor room for improvement
-- **C**: Acceptable, some security issues exist
-- **D/E/F**: Poor, serious security concerns
+   Enter a domain or IP address. You can include a port.
+
+2. **Start the check**
+
+   Click **Start check**. The tool establishes TLS connections and analyzes certificates, protocols, and vulnerabilities. A full check usually takes 1 to 3 minutes.
+
+3. **Wait for progress**
+
+   While the check is running, the page shows task progress and lets you cancel the task.
+
+4. **Review the result**
+
+   The result card shows grade, IP, CN, certificate expiry, chain status, and an issue summary.
+
+5. **Open the full report**
+
+   Click **View full report** to open the drawer with Protocol support, Vulnerability detection, and Certificate information tabs.
+
+</Steps>
+
+## Understanding results
+
+### Security grade
+
+Grades range from A+ to F:
+
+- **A+ / A**: strong security configuration.
+- **B**: generally good, with room for improvement.
+- **C**: issues require attention.
+- **D / F**: high risk and should be remediated quickly.
+
+### Issue summary
+
+The result card summarizes protocol and vulnerability issues by severity:
+
+- Critical.
+- High.
+- Medium.
+
+If no Medium-or-higher issue is found, the page shows a positive summary.
+
+### Full report
+
+The report drawer contains three tabs:
+
+- **Protocol support**: TLS/SSL protocol support and security evaluation.
+- **Vulnerability detection**: TLS vulnerabilities, CVEs, and severity.
+- **Certificate information**: subject, issuer, validity, SANs, and chain validation.
 
 <Aside type="caution">
-  Servers graded below B should undergo security hardening as soon as possible.
+  If old protocols, invalid chains, expiring certificates, or high-risk vulnerabilities are found, fix the live configuration first and then re-run the check.
 </Aside>
 
-### Certificate Information
+## Check history
 
-Displays detailed certificate information including validity period, issuer, subject names, and certificate chain verification status.
+The page shows check history with:
 
-### Protocol Support
+- Domain, IP, and port.
+- Grade and score.
+- Check status.
+- Check time.
 
-Checks TLS/SSL protocol versions supported by the server:
+History supports search, pagination, detail view, sharing, and re-checking. The page also shows total check count and the A-grade ratio for the current history set.
 
-**Recommended Configuration:**
-- ✅ TLS 1.3 (Latest, most secure)
-- ✅ TLS 1.2 (Widely compatible)
-- ⚠️ TLS 1.1 (Deprecated, not recommended)
-- ❌ TLS 1.0 (Obsolete, security issues)
-- ❌ SSL 3.0, SSL 2.0 (Critical vulnerabilities, must disable)
+## Follow-up actions
 
-<Aside type="danger">
-  Strongly recommend disabling TLS 1.0 and below, only enable TLS 1.2 and TLS 1.3.
-</Aside>
+The result card provides:
 
-### Vulnerability Detection
-
-Automatically detects common SSL/TLS vulnerabilities including POODLE, BEAST, Heartbleed, FREAK, Logjam, DROWN, and ROBOT.
-
-### Certificate Transparency (CT)
-
-Checks if the certificate is recorded in Certificate Transparency logs for browser trust compliance.
-
-## Check History
-
-The tool saves your check history for comparison and tracking. History is retained for 90 days.
-
-## Sharing and Export
-
-Generate share links or download results as PDF/JSON for team collaboration and reporting.
-
-## Best Practices
-
-Recommended server configuration based on check results includes proper protocol configuration, cipher suite selection, HSTS setup, and complete certificate chain configuration.
+- **Re-check**: run the check again for the same host.
+- **Create monitor**: open [Domain monitoring](../monitor) with the domain prefilled.
+- **Request certificate**: open [Certificate management](../certificate-management) with the domain prefilled.
+- **Share**: open the share dialog for the check result.
 
 ## FAQ
 
-### Why isn't my grade A+?
+### What if the check times out?
 
-Possible reasons: TLS 1.3 not enabled, insecure old protocols supported, HSTS not configured, or suboptimal cipher suite configuration.
+Common causes include slow server response, unstable network, or complex TLS configuration. Retry later or confirm that the target port is reachable from the public internet.
 
-### Does checking affect server performance?
+### Why is my grade not A+?
 
-No. The tool only establishes SSL/TLS handshake connections for detection without sending actual business requests, with minimal server impact.
+Common reasons:
 
-<Aside type="tip">
-  Regularly use the SSL Check tool to maintain optimal server security.
-</Aside>
+- TLS 1.3 is not enabled.
+- Old protocols or weak configuration are still supported.
+- The certificate chain is incomplete.
+- The certificate is expiring soon.
+- Medium-or-higher TLS vulnerabilities were detected.
+
+### Does SSL check affect my service?
+
+The tool performs TLS handshakes and reads configuration. It does not send business requests, so normal impact is minimal.

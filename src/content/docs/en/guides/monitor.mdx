@@ -1,71 +1,130 @@
 ---
 title: Domain monitoring
-description: Monitor certificate health in real time so you can respond before issues impact users.
+description: Discover, add, and manage certificate monitors so you can react to expiry and TLS risks.
 sidebar:
   label: Domain Monitoring
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-anssl keeps an eye on every domain you manage. Automated checks warn you about expiring certificates, broken chains, or misconfigurations before they cause outages.
+Domain monitoring continuously checks certificates on domains and ports, including validity, chain health, issuer, validation level, and reachability. Open it at [Domain monitoring](https://anssl.cn/console/monitor).
 
-## Monitoring at a glance
+## Page capabilities
 
-### Expiry tracking
+The monitoring page supports:
 
-- **Daily checks** — Verify validity windows once per day.  
-- **Smart notifications** — Send alerts when certificates approach expiry.  
-- **Visual timeline** — See remaining days for every certificate in one dashboard.
+- Discovering related domains from a primary domain and adding monitors in bulk.
+- Filtering by all, healthy, abnormal, and expiring-soon states.
+- Searching existing monitors by domain keyword.
+- Card and table views.
+- Table column configuration for dense account views.
+- Single detection, batch detection, and batch deletion.
+- Turning alert reminders on or off for one or many monitors.
+- Jumping from monitor details to WHOIS lookup or SSL check.
 
-### Health auditing
+## Add monitors
 
-Each run validates critical health signals:
-
-- ✅ Certificate status (valid/expired)  
-- ✅ Chain completeness and intermediates  
-- ✅ Revocation status  
-- ✅ Domain name mapping  
-- ✅ Supported signing algorithms  
-- ✅ TLS configuration best practices
-
-## Add a domain monitor
+The latest frontend discovers related domains first, then lets you choose the candidates to monitor.
 
 <Steps>
 
-1. **Open the monitoring page**
+1. **Open the add dialog**
 
-   Navigate to [Domain monitoring](https://anssl.cn/console/monitor).
+   Click **Add monitor** on the monitoring page. Domains are prefilled when opened from WHOIS or SSL check results.
 
-2. **Create a monitor**
+2. **Enter primary domain and port**
 
-   Click **Add monitor** and provide:
+   - Primary domain: for example `anssl.cn`.
+   - Port: defaults to `443`. If the input includes a port, such as `example.com:8443`, the form extracts the host and port automatically.
+   - Alert reminder: enabled by default.
 
-   - Domain or IP address  
-   - Port (defaults to 443)
+3. **Search related domains**
 
-3. **Save**
+   Click **Search related domains**. Candidates stream in with status, IP, issuer, validation level, remaining days, and notes.
 
-   anssl runs the first check immediately and schedules recurring jobs automatically.
+4. **Select monitorable candidates**
+
+   Only candidates that are not already monitored and have a healthy status can be selected. Already monitored, unreachable, expired, invalid, or failed candidates show the reason but cannot be added directly.
+
+5. **Submit**
+
+   Click **Monitor N domains**. The list refreshes after success, and already monitored items are skipped.
 
 </Steps>
 
-## Monitoring dashboard
+<Aside type="tip">
+  Candidate sorting prioritizes healthy domains and pushes already monitored or abnormal items lower, making the selectable items easier to scan.
+</Aside>
 
-The dashboard surfaces high-level insights and detailed findings.
+## Monitor states
 
-### Key metrics
+| State | Meaning | Recommended action |
+| ----- | ------- | ------------------ |
+| Healthy | Connection succeeds and certificate is valid | Keep monitoring |
+| Expiring soon | Certificate is valid but close to expiry | Renew or request a replacement |
+| Expired | Certificate is past its validity window | Fix immediately |
+| Invalid certificate | Chain, hostname match, or validity is abnormal | Open details and correct configuration |
+| Unreachable | Target domain or port cannot be reached | Check DNS, firewall, and service status |
+| Detection failed | TLS or certificate check did not complete | Re-run detection or use SSL check |
 
-- **Total certificates** — Count of monitored hosts.  
-- **Expiring soon** — Certificates with fewer than 30 days remaining.  
-- **Expired** — Certificates that already lapsed.  
-- **Healthy** — Certificates passing every check.
+## List operations
 
-### Certificate table
+### Search and filter
 
-Each tracked domain appears in a sortable table:
+- Use domain search to filter monitor records.
+- Use status filters for all, healthy, abnormal, and expiring-soon records.
+- In table view, use **Column configuration** to choose visible fields.
 
-| Domain       | Status        | Expires      | Days left | Issuer          | Actions     |
-| ------------ | ------------- | ------------ | --------- | --------------- | ----------- |
-| example.com  | 🟢 Healthy     | 2024-12-31   | 45        | Let's Encrypt   | Details/Renew |
-| staging.com  | 🟡 Expiring soon | 2024-11-15 | 7         | ZeroSSL         | Details/Renew |
-| legacy.site  | 🔴 Expired     | 2024-10-01   | -10       | Google Trust Services | Renew |
+### Detection
+
+- Run detection for a single monitor.
+- Select multiple rows and run batch detection. The frontend submits checks sequentially and refreshes the list when finished.
+
+### Alert reminders
+
+Each monitor can turn alerts on or off. After selecting multiple rows, you can enable or disable alerts in bulk.
+
+<Aside type="note">
+  Alert reminders depend on notification settings. If alerts are not delivered, check notification configuration under Settings and messages.
+</Aside>
+
+### Delete
+
+Deleting one or many monitors only removes monitoring records. It does not delete certificates or affect online services.
+
+## View details
+
+Open the detail drawer to see:
+
+- Domain, port, status, created time, and last check time.
+- Issuer, validation level, effective time, expiry time, and remaining days.
+- Domains contained in the certificate, with a copy-all action.
+
+The drawer has two quick actions:
+
+- **WHOIS lookup**: opens WHOIS with the current domain.
+- **SSL check**: opens SSL check with `domain:port`.
+
+## Use with certificate management
+
+From the certificate lifecycle drawer, you can add a 443 monitor for the certificate's primary domain. The monitoring page helps identify expiring or abnormal online certificates, then you can return to certificate management to renew, re-request, or deploy replacements.
+
+## FAQ
+
+### Why can I not select a candidate?
+
+Candidates can be selected only when they are not already monitored and their status is healthy. Already monitored, unreachable, expired, invalid, or failed candidates need their underlying issue addressed first.
+
+### What should I do if related-domain search times out?
+
+Discovery depends on certificate records and network checks. Narrow the input, retry later, or start by monitoring the primary domain.
+
+### What if a monitor is unreachable?
+
+Check:
+
+1. DNS resolves to the expected IP.
+2. The port is open.
+3. The service supports TLS.
+4. Firewall or security group rules allow external access.
+5. A non-443 port should be specified.

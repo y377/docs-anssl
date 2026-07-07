@@ -1,173 +1,133 @@
 ---
 title: Dashboard
-description: Real-time monitoring of certificates, domain monitoring, and deployment status for a complete overview of your certificate management
+description: View health, state distribution, and certificate trends across certificates, monitors, and deployment clients.
+sidebar:
+  label: Dashboard
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Steps } from "@astrojs/starlight/components";
 
-The anssl dashboard provides a comprehensive view of your certificate management system, using real-time statistics and visual charts to help you quickly understand system status and key metrics.
+The dashboard gives you a quick view of the anssl console. It aggregates certificate, domain monitor, and deployment client data, then shows health, state distribution, warnings, certificate request trends, and CA distribution.
 
-## Accessing the Dashboard
+## Open the dashboard
 
-After logging in, you'll land on the dashboard by default: [https://anssl.cn/console/dashboard](https://anssl.cn/console/dashboard)
+After signing in, you land on the [Dashboard](https://anssl.cn/console/dashboard) by default. You can also open **Workspace → Dashboard** from the console sidebar.
 
-## Main Features
+## Top actions
 
-### Real-time Statistics Overview
+The page header includes:
 
-The top of the dashboard displays four key metric cards:
+- **Refresh**: refresh certificate, monitor, and deployment client data together.
+- **Request certificate**: open [Certificate management](./certificate-management).
+- **Dynamic summary**: a short generated summary such as healthy certificate count, certificates needing attention, renewals in progress, or abnormal monitors.
 
-- **Total Certificates**: Current number of certificates under management
-- **Total Monitors**: Number of domains being monitored
-- **Total Deployments**: Number of configured deployment tasks
-- **Today's Operations**: Certificate applications, deployments, and other operations today
+When there are no certificates, monitors, or deployment clients, the summary prompts you to request the first certificate.
 
-<Aside type="tip">
-  Click any statistics card to quickly navigate to the corresponding management page.
-</Aside>
+## Warning banner
 
-### Certificate Status Distribution
+The dashboard shows a yellow warning banner when:
 
-A pie chart visualizes the distribution of certificates by status:
+- Certificates need attention.
+- Monitors have failed, expired, or are unreachable.
 
-- **Issued**: Certificates in normal use
-- **Expiring Soon**: Certificates expiring within 30 days
-- **Expired**: Certificates that have already expired
-- **Applying**: Certificates currently being applied for
-- **Revoked**: Certificates that have been revoked
-
-<Aside type="caution">
-  Pay special attention to "Expiring Soon" and "Expired" certificates, and renew them in a timely manner.
-</Aside>
-
-### Monitor Status Statistics
-
-Shows real-time status of domain monitoring:
-
-- **Active**: Certificate valid and not approaching expiration
-- **Alert**: Certificate expiring soon or has issues
-- **Resolved**: Previous alerts have been addressed
-
-### Deployment Status Tracking
-
-Displays deployment task execution status:
-
-- **Pending**: Deployment tasks in queue
-- **Success**: Deployment completed successfully
-- **Failed**: Deployment execution failed, requires investigation
-
-### Trend Charts
-
-#### Certificate Trends
-
-Line chart showing certificate changes over the selected time range:
-
-- Number of certificate applications
-- Number of expired certificates
-- Number of certificate renewals
-
-#### Monitoring Trends
-
-Shows changes in domain monitoring status:
-
-- New monitors added
-- Alert count changes
-- Issues resolved
-
-#### Deployment Trends
-
-Tracks deployment task execution:
-
-- Total deployment tasks
-- Success rate changes
-- Failure rate statistics
-
-## View Settings
-
-### Time Range Selection
-
-The dashboard supports multiple time ranges:
-
-- **Last 7 Days**: View data for the past week
-- **Last 30 Days**: View data for the past month
-- **Last 90 Days**: View data for the past quarter
-
-<Aside type="note">
-  Time range settings apply to all trend charts simultaneously, making it easy to compare data across different periods.
-</Aside>
-
-### Display Density
-
-Adjust the dashboard display density:
-
-- **Default**: Standard card spacing and size
-- **Compact**: Reduced spacing to show more content on one screen
-
-### Auto-refresh
-
-Dashboard data automatically refreshes periodically to ensure the latest statistics are displayed. You can also manually refresh by clicking the refresh button.
-
-## Data Interpretation Guidelines
-
-### Certificate Health
-
-Assess the health of your certificate management:
-
-- ✅ **Good**: Expired and expiring certificates < 5%
-- ⚠️ **Needs Attention**: Expiring certificates between 5-10%
-- 🚨 **Immediate Action Required**: Expired or expiring certificates > 10%
-
-### Monitoring Coverage
-
-It's recommended to configure monitoring for all important domains:
-
-- All production environment domains
-- Customer-facing service domains
-- API and microservice domains
-
-### Deployment Success Rate
-
-Monitor deployment success rate metrics:
-
-- **Excellent**: Success rate > 95%
-- **Good**: Success rate 85-95%
-- **Needs Optimization**: Success rate < 85%
+The banner includes shortcuts to Certificate management or Domain monitoring.
 
 <Aside type="tip">
-  If deployment failure rate is high, check deployment target configuration and network connectivity.
+  When checking the dashboard daily, start with the warning banner. If no banner is shown and the summary says everything is normal, the core assets have no obvious issues.
 </Aside>
 
-## Quick Actions
+## Health cards
 
-Execute common operations directly from the dashboard:
+The dashboard has three clickable health cards.
 
-- **Apply for New Certificate**: Click "New" button on certificate card
-- **Add Monitor**: Click "Add" button on monitor card
-- **Create Deployment**: Click "Create" button on deployment card
+### Certificates
 
-## Mobile Support
+The certificate card shows:
 
-The dashboard is fully responsive and supports mobile devices, allowing you to check system status anytime on your phone or tablet. The layout automatically adjusts for small screens.
+- Total certificates.
+- Health: healthy certificates / total certificates.
+- State distribution: healthy, applying, failed, expired.
 
-## Best Practices
+Click the card to open Certificate management.
 
-### Daily Checklist
+### Domain monitoring
 
-It's recommended to check the dashboard daily for:
+The monitor card shows:
 
-1. Certificates expiring soon that need renewal
-2. Monitoring alerts that need attention
-3. Failed deployments that need retry
-4. Today's operations completed normally
+- Total monitors.
+- Health: healthy monitors / total monitors.
+- State distribution: healthy, abnormal, unreachable, expired.
 
-### Regular Review
+Click the card to open Domain monitoring.
 
-Review trend charts weekly or monthly to:
+### Automated deployment
 
-- Analyze certificate application and usage patterns
-- Identify potential capacity planning needs
-- Optimize deployment strategies and monitoring configurations
+The deployment card shows:
+
+- Total deployment clients.
+- Health: online clients / total clients.
+- State distribution: online, offline, enabled, disabled.
+
+Click the card to open Automated deployment.
 
 <Aside type="note">
-  Dashboard data helps you understand system usage and provides insights for capacity planning and resource optimization.
+  A 0% health value does not always mean failure. If no assets are configured for that area, such as no deployment clients, health is also shown as 0%.
 </Aside>
+
+## Certificate request trend
+
+The trend chart counts certificate requests by certificate creation time. You can switch the time range:
+
+- 7 days.
+- 30 days.
+- 90 days.
+
+Use it to spot concentrated certificate requests or recent growth that may need deployment and monitoring follow-up.
+
+## CA distribution
+
+The CA distribution chart groups current certificates by issuing CA:
+
+- Google Trust Services.
+- Let's Encrypt.
+- ZeroSSL.
+- SSL.com.
+- Actalis.
+
+If there are no certificates, the chart area shows an empty state.
+
+## Suggested workflow
+
+<Steps>
+
+1. **Check the warning banner**
+
+   If certificates need attention or monitors are abnormal, use the shortcut buttons first.
+
+2. **Review the three health cards**
+
+   Identify whether the weak area is certificates, monitors, or deployment clients.
+
+3. **Check the trend**
+
+   If many certificates were added recently, confirm they are deployed and monitored.
+
+4. **Refresh after remediation**
+
+   After fixing issues, return to the dashboard and refresh to confirm the summary and health values changed.
+
+</Steps>
+
+## FAQ
+
+### Why is the trend empty?
+
+The chart uses certificate creation time. If no certificates were created in the selected range, it shows an empty state. Try switching to 30 or 90 days.
+
+### Why is deployment health low?
+
+Deployment health is based on online clients. Check whether clients are offline, services stopped, networks blocked, or no deployment clients have been connected yet.
+
+### Why does dashboard data differ from a list page?
+
+Click **Refresh** on the dashboard. If it still differs, refresh the corresponding list page and check whether filters are applied there.

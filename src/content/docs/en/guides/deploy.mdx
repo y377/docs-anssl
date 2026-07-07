@@ -1,50 +1,171 @@
 ---
 title: Automated deployment
-description: Push renewed certificates to your servers and cloud environments without manual work.
+description: Manage deployment clients, certificate bindings, business targets, logs, and client upgrades.
 sidebar:
   label: Automated Deployment
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-anssl automates certificate rollouts so freshly issued files reach your infrastructure as soon as they’re available. Use the deployment agent for traditional servers or integrate with built-in cloud connectors.
+Automated deployment syncs issued certificates to servers, cloud platforms, or other business targets. The latest frontend manages deployment clients, certificate bindings, target configuration, manual deployment execution, logs, and client upgrades. Open it at [Automated deployment](https://anssl.cn/console/deploy).
 
-## Configure automated deployment
+## Page overview
+
+The automated deployment page lists connected deployment clients and provides:
+
+- Online and offline client summaries.
+- Client search by IP address.
+- Card and table views.
+- Table column configuration.
+- Client detail drawer.
+- Certificate binding dialog.
+- Business target configuration.
+- Runtime logs.
+- Remark editing, enable/disable, and deletion.
+- Single or batch client upgrade notifications.
+
+## Connect a deployment client
 
 <Steps>
 
-1. **Open the deployment console**
+1. **Download the client**
 
-   Visit the [Automatic deployment](https://anssl.cn/console/deploy) page in anssl.
+   Click **Download client** on the deployment page to get the deployment CLI.
 
-2. **Install the deployment CLI**
+2. **Install and configure it**
 
-   Download the agent for your platform and follow the installation instructions provided on the page.
+   Install the CLI on the target server or runtime, then configure access credentials, platform credentials, and startup behavior according to the client documentation.
 
-3. **Select the certificate**
+3. **Wait for the client to come online**
 
-   Choose the certificate that should be synchronized to your target environment.
+   After it connects successfully, the client appears in the deployment list with IP, hostname, OS, architecture, version, and status.
 
-4. **Configure targets**
+4. **Add a remark**
 
-   Add one or more destinations (SSH servers, load balancers, or cloud providers) and specify deployment commands or API credentials.
-
-5. **Run a test deployment**
-
-   Trigger a dry run to confirm connectivity and permissions before turning on automation.
-
-6. **Enable continuous deployment**
-
-   Activate the schedule so anssl pushes renewed certificates immediately after issuance.
+   Add a business remark such as "production Nginx", "test IIS", or "CDN node" so the client is easier to find and maintain.
 
 </Steps>
 
 <Aside type="tip">
-  Combine automated deployment with monitoring alerts to ensure every critical endpoint receives updates before certificates expire.
+  The page includes an open-source repository link for the deployment client. Online upgrade requires a client version that supports it; older clients must be upgraded manually first.
 </Aside>
 
-## Troubleshooting
+## Bind certificates
 
-- Review the deployment history timeline to see logs from recent syncs.  
-- Ensure the deployment CLI has permission to write to your certificate paths.  
-- If a step fails, rerun the test deployment after addressing the reported error.
+After a client is online, bind certificates to it.
+
+<Steps>
+
+1. **Open the certificate list**
+
+   Click the certificate action on a client.
+
+2. **Add certificates**
+
+   Choose certificates from the free certificate inventory.
+
+3. **Confirm binding**
+
+   After binding succeeds, the client shows its linked certificates. Binding only connects the client and certificate; configure business targets next to define where the certificate is deployed.
+
+</Steps>
+
+You can also bind certificates to clients from [Certificate management](./certificate-management).
+
+## Configure deployment targets
+
+Each bound certificate can have deployment targets. A target combines a provider and a business type, with available options reported by the online client.
+
+<Steps>
+
+1. **Open target configuration**
+
+   In the client's certificate list, choose a certificate and open target configuration.
+
+2. **Confirm the client is online**
+
+   Offline clients can only view or delete saved targets. They cannot read platform configuration, test connections, or execute deployment.
+
+3. **Choose provider and business type**
+
+   Providers without CLI credentials are disabled and shown in the warning message.
+
+4. **Test the connection**
+
+   A new target must pass connection testing before it can be added.
+
+5. **Save the target**
+
+   Saved targets are grouped by provider.
+
+6. **Run manual deployment**
+
+   Use **Manual deploy** on an existing target to push the current certificate immediately.
+
+</Steps>
+
+<Aside type="note">
+  Single-domain certificates can have one deployment target. Multi-domain certificates are limited by domain count. Wildcard certificates are limited to 10 targets in the frontend.
+</Aside>
+
+## Enable or disable deployment
+
+Each client has an automated deployment switch:
+
+- Enabled: the client can participate in certificate sync and target deployment.
+- Disabled: automated deployment for that client is paused.
+
+You can select multiple clients and enable or disable them in bulk.
+
+## View client details
+
+The detail drawer shows:
+
+- Client ID, with copy support.
+- IP, hostname, operating system, and architecture.
+- Client version and whether an update is available.
+- Online, offline, or unknown status.
+- Created time and remark.
+- Automated deployment switch.
+- Number of linked certificates.
+
+## View logs
+
+The log dialog helps diagnose connection, update, certificate sync, deployment execution, and error messages. If deployment fails, check logs first, then verify client platform credentials, business targets, and service permissions.
+
+## Online upgrade
+
+When a client version is older than the recommended version and supports online updates, the page shows an upgrade action. You can:
+
+- Notify one client to upgrade.
+- Select multiple clients and notify them in bulk.
+
+<Aside type="caution">
+  Online upgrade requires the client to be online and to meet the minimum supported update version. Other clients need manual upgrade.
+</Aside>
+
+## FAQ
+
+### Why can I not add a deployment target?
+
+Common causes:
+
+- The client is offline.
+- Platform credentials are not configured in the CLI.
+- Connection test has not passed.
+- The same business type is already added.
+- The certificate has reached its target count limit.
+
+### What if manual deployment fails?
+
+Check:
+
+1. The client is online.
+2. Platform credentials are still valid.
+3. The business target exists and has write permission.
+4. The certificate is bound to the client.
+5. The specific error in the log dialog.
+
+### Does deleting a client delete certificates?
+
+No. Deleting a deployment client removes that client record and related deployment links, but it does not delete certificate files from certificate management.

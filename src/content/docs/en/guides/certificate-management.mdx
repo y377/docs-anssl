@@ -1,120 +1,193 @@
 ---
 title: Certificate management
-description: Learn how to request, renew, download, and revoke SSL/TLS certificates in anssl.
+description: Request, renew, deploy, download, and track free SSL/TLS certificates in anssl.
 sidebar:
   label: Certificate Management
 ---
 
 import { Aside, Steps } from "@astrojs/starlight/components";
 
-anssl covers every stage of the certificate lifecycle—from issuance and renewal to revocation—so you can manage everything in one console.
+Certificate management is the place to request, renew, bind, download, revoke, and track free SSL/TLS certificates. The current console page is [Certificate management](https://anssl.cn/console/cert/free).
 
-## Issue certificates
+## Page overview
 
-### Supported certificate types
+The page includes:
 
-- **Single-domain** — Protect one hostname (for example `example.com`).  
-- **Multi-domain (SAN)** — Secure several distinct hostnames.  
-- **Wildcard** — Cover a root domain and all subdomains (for example `*.example.com`).
+- Certificate totals, healthy count, abnormal count, and expiring-soon summary.
+- Domain search, status filters, and validation filters.
+- Card and table views.
+- A certificate lifecycle drawer for certificate details, deployment links, monitor links, and raw certificate material.
+- Batch download, batch renewal, batch client binding, and batch deletion.
 
-### Available certificate authorities
+<Aside type="note">
+  The latest console exposes the free certificate workflow. A separate commercial certificate upload page is not available in the current frontend.
+</Aside>
 
-- **Let's Encrypt** — Free, automated DV certificates.  
-- **ZeroSSL** — Free 90-day certificates with ACME support.  
-- **Google Trust Services** — Fast issuance operated by Google.
+## Supported certificate types
 
-### Issuance workflow
+- **Single-domain certificate**: protects one hostname such as `example.com`.
+- **Multi-domain certificate (SAN)**: protects multiple hostnames with one certificate.
+- **Wildcard certificate**: protects a domain and its subdomains, such as `*.example.com`.
+- **IP certificate**: issued through HTTP-01 validation and currently supported only with Let's Encrypt.
+
+## Supported CAs
+
+| CA | Notes | Limits |
+| -- | ----- | ------ |
+| Google Trust Services | Recommended default with fast and stable issuance | Does not support IP certificates |
+| Let's Encrypt | Free ACME CA | Supports IP certificates and has rate limits |
+| ZeroSSL | Free certificate service under Sectigo | Good for regular domain certificates |
+| SSL.com | Commercial CA provider | Single-domain only |
+| Actalis | Italian CA provider | Single-domain only |
+
+<Aside type="tip">
+  SSL.com and Actalis do not support wildcard or multi-domain configurations. The form shows an error when the selected CA conflicts with your domain setup.
+</Aside>
+
+## Request a certificate
+
+The request dialog has four steps: domain configuration, certificate options, deployment configuration, and issuance progress.
 
 <Steps>
 
-1. **Log in to the console**
+1. **Open the request dialog**
 
-   Visit the [anssl dashboard](https://anssl.cn/console/dashboard) and sign in.
+   Click the certificate request action on the Certificate management page. When opened from SSL check or DNS query, the domain is prefilled automatically.
 
-2. **Open Certificates**
+2. **Configure domains and validation**
 
-   Choose **Certificates** in the left navigation.
+   - DNS-01: uses CNAME validation and works well for wildcards and renewals.
+   - HTTP-01: uses an HTTP validation file and works for publicly reachable single domains or IP addresses.
 
-3. **Create a certificate**
+   Enter multiple domains one per line. Wildcard domains must use DNS-01.
 
-   Click **New certificate** and provide:
+3. **Choose CA and signing algorithm**
 
-   - Type (single-domain / multi-domain / wildcard)  
-   - Domain list  
-   - Signing algorithm (EC256 recommended)  
-   - Preferred CA
+   Select the issuing CA and key algorithm. For IP certificates, the form automatically switches to Let's Encrypt and disables unsupported CAs.
 
-4. **Validate domains**
+4. **Configure deployment**
 
-   Pick the validation method that fits your environment:
+   You can skip deployment and bind later, or select existing deployment clients and business targets so the certificate is bound after issuance.
 
-   - **DNS** — Add the requested TXT record to your DNS zone.  
-   - **HTTP** — (coming soon) Upload the provided token to your site root.
+5. **Track progress**
 
-5. **Receive the certificate**
-
-   After successful validation, the CA issues the certificate—usually within a few minutes.
+   After submission, the progress step updates in real time. You can also move the request to the background and continue using other pages.
 
 </Steps>
 
 <Aside type="tip">
-  EC256 offers RSA3072 levels of security with smaller keys and faster handshakes, so it’s our default recommendation.
+  Background issuance tasks are kept in the browser for about one hour, so you can reopen the page and continue tracking progress.
 </Aside>
 
-## Renew certificates
+## Domain validation
 
-### Automatic renewals
+### DNS-01 / CNAME validation
 
-anssl can renew certificates automatically before they expire:
+DNS-01 shows the required CNAME record. After updating DNS, refresh the validation status. Forced refresh has a short cooldown to avoid excessive checks.
 
-- Renewal attempts begin 20 days before expiry.  
-- The platform retries daily until success.  
-- Failures trigger email and webhook notifications.  
-- Customize the renewal window to match your operational policies.
+Use DNS-01 for:
 
-### Manual renewals
+- Wildcard certificates.
+- Multi-domain certificates.
+- More reliable future renewals.
+- Sites where HTTP validation files cannot be placed.
 
-To renew manually:
+### HTTP-01 validation
 
-1. Open the Certificates page.  
-2. Locate the certificate to renew.  
-3. Click **Renew**.  
-4. anssl repeats the validation and issuance steps automatically.
+HTTP-01 fetches ACME challenge data and shows the validation path and content. If the token has not been generated yet, the frontend polls briefly. If it times out, retry later or request again.
+
+Use HTTP-01 for:
+
+- Publicly reachable websites.
+- IP certificate requests.
+- Single-domain cases where DNS changes are inconvenient.
+
+<Aside type="caution">
+  HTTP-01 requires the CA to reach the validation URL from the public internet. Intranet services, unresolved domains, and firewall-blocked sites usually cannot pass it.
+</Aside>
+
+## View the lifecycle drawer
+
+Click a certificate to open the lifecycle drawer. It shows:
+
+- Basic information, domains, SANs, CA, remaining days, and status.
+- CNAME or HTTP-01 validation information.
+- Bound deployment clients.
+- Monitor items matching the certificate domain.
+- Entry points for raw PEM, private key, and chain content.
+
+The drawer also provides quick actions:
+
+- Bind deployment clients.
+- Add a 443 monitor for the certificate's primary domain.
+- View certificate logs.
+- View raw certificate material.
+
+## Renew, re-request, and revoke
+
+| Action | Description |
+| ------ | ----------- |
+| Renew | Submit a renewal request for an existing certificate. Only records with certificate files can be renewed. |
+| Re-request | Submit a new request using the original domains, CA, algorithm, and validation method. DNS-01 records must pass CNAME validation first. |
+| Revoke | Submit a revocation request to the CA, usually after private key exposure or loss of trust. |
+
+<Aside type="danger">
+  Revocation cannot be undone. After revoking, request and deploy a replacement certificate.
+</Aside>
 
 ## Download certificates
 
-When issuance succeeds you can download the assets:
+After issuance succeeds, download the certificate ZIP package from the list or details. The package usually includes:
 
-1. Locate the certificate in the inventory.  
-2. Click **Download** to retrieve the bundle (certificate, key, and intermediates if applicable).
+- Certificate file.
+- Private key file.
+- Intermediate certificate or full chain.
 
-## Revoke certificates
+Batch download triggers downloads for selected certificates and skips records without certificate files or private keys.
 
-Revoke a certificate immediately if the private key is compromised or the certificate is no longer required:
+## Deploy certificates
 
-1. Open the Certificates page.  
-2. Select the relevant certificate.  
-3. Click **Revoke**.  
-4. Provide the reason for audit tracking.  
-5. anssl submits the revocation request to the issuing CA.
+Certificates can be bound to deployment clients:
 
-<Aside type="danger">
-  Revocation is permanent. After revoking, request a new certificate to restore service.
+1. Choose **Deploy** from the certificate list or bind clients in the lifecycle drawer.
+2. Select one or more online deployment clients.
+3. For a single certificate, the dialog shows already bound clients to avoid duplicate binding.
+4. For multiple selected certificates, the selected certificate-client bindings are submitted together.
+
+After binding certificates to clients, configure business targets and run manual deployments on the [Automated deployment](./deploy) page.
+
+## Batch operations
+
+After selecting rows in the certificate list, you can:
+
+- Batch download selected certificate files.
+- Batch renew certificates by submitting renewal requests sequentially.
+- Batch bind certificates to deployment clients.
+- Batch delete certificate records.
+
+<Aside type="caution">
+  Batch deletion removes certificate records. Confirm that you no longer need the certificates or private keys before running it.
 </Aside>
 
 ## Troubleshooting
 
-### Issuance failed—what next?
+### Issuance failed. What should I check?
 
 Common causes include:
 
-- DNS records missing or not yet propagated.  
-- HTTP validation file inaccessible.  
-- Incorrect domain configuration.  
-- Hitting CA rate limits.
+- DNS CNAME has not propagated or is incorrect.
+- HTTP-01 validation URL cannot be reached by the CA.
+- A wildcard domain was configured with HTTP-01.
+- The selected CA does not support the domain type.
+- CA rate limits were reached.
 
-Fixes:
+Recommended steps:
 
-1. Confirm the validation data matches the instructions.  
-2. Wait for DNS propagation (typically 10 minutes to 2 hours).  
-3. Review the error details in the certificate activity log for guidance.
+1. Check the progress view or logs for the failure reason.
+2. Verify validation records, validation path, and DNS resolution.
+3. Wait for DNS propagation and refresh validation.
+4. Change CA or validation method if needed, then request again.
+
+### A certificate is expiring soon. What now?
+
+Filter the list by expiring certificates, then renew or re-request the certificates that need action. If a certificate is bound to deployment clients, check deployment status and business targets after renewal succeeds.

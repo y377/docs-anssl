@@ -84,6 +84,11 @@ export default defineConfig({
 									translations: { 'en-US': 'CA Root Certificate Guide' },
 									slug: 'guides/selfcert/ca',
 								},
+								{
+									label: '证书生成',
+									translations: { 'en-US': 'Certificate Generation' },
+									slug: 'guides/selfcert/cert',
+								},
 							],
 						},
 						{
@@ -120,6 +125,11 @@ export default defineConfig({
 									label: 'DNS 查询',
 									translations: { 'en-US': 'DNS Query' },
 									slug: 'guides/tools/dns-query',
+								},
+								{
+									label: '证书转换',
+									translations: { 'en-US': 'Certificate Converter' },
+									slug: 'guides/tools/cert-convert',
 								},
 								{
 									label: 'SSL/TLS 证书检查',

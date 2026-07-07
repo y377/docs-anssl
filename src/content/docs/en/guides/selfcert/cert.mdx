@@ -1,0 +1,94 @@
+---
+title: Certificate generation
+description: Generate local certificates for intranet, test, and private environments.
+sidebar:
+  label: Certificate Generation
+---
+
+import { Aside, Steps } from "@astrojs/starlight/components";
+
+Certificate generation creates local certificates for intranet services, test environments, private systems, or temporary validation. Generated certificates can be downloaded directly or converted to formats such as PFX/P12 and DER in the certificate converter.
+
+## Open the page
+
+Go to [Certificate generation](https://anssl.cn/console/selfcert/cert), or open **Local certificates → Certificate generation** from the console sidebar.
+
+The page supports card and table views. Your view preference is stored in the browser and reused the next time you open the page.
+
+## Generate a certificate
+
+<Steps>
+
+1. **Click Generate certificate**
+
+   Open the generation dialog.
+
+2. **Fill in certificate identity**
+
+   - Certificate name: used in the list and download file name.
+   - Common Name: usually the primary domain, host name, or IP address.
+
+3. **Add SAN entries**
+
+   - DNS names: one domain per line. Wildcards such as `*.example.com` are supported.
+   - IP addresses: one IP per line. The current form requires at least one IP address.
+
+4. **Choose certificate parameters**
+
+   - Organization: optional subject information.
+   - Validity: defaults to 365 days and supports 1 to 36500 days.
+   - Key type: RSA 2048, RSA 3072, RSA 4096, ECC P-256, or ECC P-384.
+
+5. **Choose the signing method**
+
+   - Self-signed certificate: the default option for temporary testing.
+   - Sign with an existing CA: select a CA created in **CA management**.
+
+6. **Submit**
+
+   After generation succeeds, the certificate appears in the list.
+
+</Steps>
+
+<Aside type="tip">
+  To make systems trust certificates signed by a local CA, install and trust the corresponding CA root certificate first. See the [CA root certificate guide](./ca).
+</Aside>
+
+## Download files
+
+Click **Download** in the certificate list to receive a ZIP package. It usually contains:
+
+- `certificate.crt`: the certificate.
+- `private.key`: the private key.
+- `fullchain.crt`: the certificate chain, when available.
+- `ca.crt`: the signing CA root certificate, when available.
+
+<Aside type="caution">
+  The download package contains a private key. Store and transfer it only in controlled environments. If the key is exposed, stop using the certificate and issue a replacement.
+</Aside>
+
+## View and delete
+
+- Use **View** to inspect certificate details, private key, and chain content.
+- Use **Delete** to remove the local certificate record. Back up any files you still need before deleting.
+
+## Use with certificate conversion
+
+Local certificates are stored as PEM material. If another system needs a different format, open [Certificate converter](../tools/cert-convert):
+
+- IIS or Windows import: convert to PFX/P12.
+- Network devices or embedded systems: convert to DER/CER when required.
+- Nginx, Apache, and panels: PEM/CRT/KEY is usually the right format.
+
+In the converter, select **Local certificate** as the source to load the generated certificate, private key, and chain directly.
+
+## Common use cases
+
+- Intranet HTTPS services.
+- Development, test, and staging environments.
+- Private APIs, gateways, and device consoles.
+- Temporary certificates that do not need public browser trust.
+
+<Aside type="note">
+  Local certificates are not the same as publicly trusted certificates issued by public CAs. For public websites, use the free certificate workflow in Certificate management.
+</Aside>

@@ -1,153 +1,130 @@
 ---
 title: WHOIS lookup
-description: Retrieve domain registration data, expiry timelines, and DNS configuration details.
+description: Query domain registration information, expiry time, name servers, and status codes.
 sidebar:
   label: WHOIS Lookup
 ---
 
-import { Aside } from "@astrojs/starlight/components";
+import { Aside, Steps } from "@astrojs/starlight/components";
 
-WHOIS is the protocol registrars use to publish domain ownership and lifecycle information. anssl’s WHOIS tool surfaces registrar data, expiry dates, name servers, and status codes in seconds.
+WHOIS lookup shows registrar, creation time, expiry time, registrant, DNSSEC, name servers, and EPP status codes for a domain. Open it at [WHOIS lookup](https://anssl.cn/console/tools/whois).
 
-## Run a WHOIS search
+## Page layout
 
-Open the [WHOIS tool](https://anssl.cn/console/tools/whois) and:
+The WHOIS tool has two tabs:
 
-1. Enter the domain (for example `example.com`).  
-2. Click **Search**.  
-3. Review the returned record.
+- **Domain lookup**: run queries, view results, share, add monitoring, and create reminders.
+- **Reminder list**: manage domain expiry reminders you created.
 
-## Interpreting the output
+When opened from monitor details, WHOIS automatically receives the current domain and runs the query.
 
-### Domain basics
+## Run a lookup
 
-```
-Domain Name: example.com
-Registrar: GoDaddy.com, LLC
-Registrar IANA ID: 146
-Registrar WHOIS Server: whois.godaddy.com
-Registrar URL: https://www.godaddy.com
-```
+<Steps>
 
-### Key dates
+1. **Enter a domain**
 
-```
-Created: 1995-08-14T04:00:00Z
-Updated: 2024-08-13T09:22:45Z
-Expires: 2025-08-13T04:00:00Z
-```
+   Type a domain such as `example.com`.
 
-<Aside type="tip">
-  Treat the expiry date as a hard deadline—renew at least 30 days ahead to avoid redemption fees or accidental loss.
-</Aside>
+2. **Click Search**
 
-### Registrant details
+   The tool requests WHOIS data and displays structured results.
 
-GDPR and registrar privacy services often redact sensitive data, resulting in outputs such as:
+3. **Review the result**
 
-```
-Registrant Organization: Privacy Protected
-Registrant Country: IS
-```
+   Results include registrar, creation time, expiry time, registrant, DNSSEC, name servers, and domain status.
+
+</Steps>
+
+Query history is stored in the browser with up to 100 records. Use **History** to revisit recent domains, delete one item, or clear all history.
+
+## Query results
+
+### Basic information
+
+The basic information card shows:
+
+- Registrar.
+- Creation time.
+- Expiry time and remaining days.
+- Registrant.
+- DNSSEC status.
+
+Expired domains show an expired tag. Active domains show remaining days.
 
 ### Name servers
 
-```
-Name Server:
-- ns1.example.com
-- ns2.example.com
-```
+The name server card lists NS records and provides a copy-all action.
 
-### Domain status codes
+### Domain status
 
-Common codes include:
+The status card shows EPP status codes and translates known codes, for example:
 
-- **clientTransferProhibited** — Locked against unauthorized transfers.  
-- **clientUpdateProhibited** — Locked to prevent contact updates.  
-- **clientDeleteProhibited** — Protected from accidental deletion.  
-- **clientRenewProhibited** — Renewal temporarily blocked.  
-- **clientHold** — DNS service suspended (often billing or policy related).  
-- **pendingDelete** — Domain is scheduled for deletion.  
-- **redemptionPeriod** — Grace period after expiry when the owner can still reclaim the domain.
+- `clientTransferProhibited`: transfer prohibited.
+- `clientUpdateProhibited`: update prohibited.
+- `clientDeleteProhibited`: delete prohibited.
+- `clientHold`: DNS service suspended.
+- `pendingDelete`: pending deletion.
+- `redemptionPeriod`: redemption period.
 
 <Aside type="caution">
-  `clientHold`, `pendingDelete`, or `redemptionPeriod` require immediate attention before the domain becomes publicly available.
+  If the status indicates hold, pending deletion, or redemption, check the domain in your registrar account as soon as possible.
 </Aside>
 
-## When to use WHOIS
+## Quick actions
 
-### 1. Confirm domain ownership
+After a successful query, the result card provides:
 
-Before purchasing or inheriting a project, check:
+- **Reminder**: create an expiry reminder for active domains.
+- **Add monitor**: open [Domain monitoring](../monitor) with the current domain prefilled.
+- **Share**: open the share dialog for the query result.
 
-- Registrar and registrant details.  
-- Domain age (creation date).  
-- Expiry and renewal history.  
-- Whether the domain is active or restricted.
+## Reminders
 
-### 2. Track expiry milestones
+Reminders help track domain expiry dates.
 
-Periodically review critical domains:
+<Steps>
 
-- Prevent accidental expiration.  
-- Budget for renewals.  
-- Avoid losing strategic names to opportunistic buyers.
+1. **Run a WHOIS lookup**
 
-### 3. Troubleshoot DNS issues
+   Confirm the domain is not expired and the result includes an expiry time.
 
-If a site goes offline, WHOIS helps you verify:
+2. **Click Reminder**
 
-- Correct name server assignment.  
-- Lock or hold statuses preventing updates.  
-- Whether the domain has expired.
+   Open the reminder dialog.
 
-## Pairing WHOIS with certificate management
+3. **Set days before expiry**
 
-### Pre-issuance checks
+   Choose how many days before expiry to remind. The default is 30 days.
 
-Before requesting an SSL certificate:
+4. **Save**
 
-- Confirm the domain is registered and valid.  
-- Ensure the correct DNS provider is set so you can update records.  
-- Verify no registrar locks will block ACME validation.
+   Saved reminders appear in the **Reminder list** tab.
 
-## Privacy considerations
+</Steps>
 
-Due to GDPR and local privacy laws:
-
-- Many registrants opt for privacy services.  
-- Some TLDs redact almost all contact data.  
-- You may need to reach out to the registrar for additional details.
+In the reminder list, you can edit reminder days, delete reminders, and refresh the list.
 
 <Aside type="note">
-  ICANN requires registrars to expose WHOIS data, but the exact fields vary by registry policy. Expect different output between TLDs.
+  Reminders are an aid for domain asset management. Actual renewal status is still determined by the registrar, and critical domains should use registrar auto-renewal.
 </Aside>
 
-## Best practices
+## Use with other tools
 
-### Audit key domains regularly
+- Add monitoring from WHOIS results to continuously track certificate status.
+- Open WHOIS from monitor details to check expiry, registrar locks, and name servers.
+- Before requesting certificates, use WHOIS to confirm the domain is still registered and active.
 
-Review high-value domains each quarter:
+## FAQ
 
-- Corporate primary domains  
-- Brand-protection domains  
-- Core application domains
+### Why are registrant details missing?
 
-### Maintain an asset inventory
+GDPR, registrar privacy protection, and TLD policy often hide detailed registrant data. This is normal.
 
-Track:
+### Is query history synced to my account?
 
-- Every domain you own  
-- Registrar details  
-- Creation and expiry dates  
-- Business purpose and owner  
-- Renewal status and notes
+No. Query history is stored in the current browser and is not synced across devices.
 
-### Configure reminders
+### WHOIS says the domain is active, but the website is down. What next?
 
-- Set reminders 90, 30, and 7 days before expiry.  
-- Use anssl’s monitoring feature to automate alerts and reporting.
-
-<Aside type="tip">
-  Enable auto-renewal for mission-critical domains to avoid surprises.
-</Aside>
+Check name servers, DNS resolution, hold statuses, web server reachability, and certificate status.
